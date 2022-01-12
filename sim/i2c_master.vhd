@@ -14,10 +14,8 @@ entity i2c_master is
     data_rdy : out std_logic;
     i2c_data : out std_logic_vector(11 downto 0);
     --i2c communtiation interface        
-    sda_o : out std_logic;
-    scl_o : out std_logic;
-    sda_i : in std_logic;
-    scl_i : in std_logic        
+    sda : inout std_logic;
+    scl : inout std_logic       
   );
 end i2c_master;
 
@@ -32,12 +30,12 @@ architecture i2c_master_arch of i2c_master is
 begin
 
     clk <= not clk after CLK_PERIOD_100KHZ/2;
-    scl_o <= clk when scl_on = '1' else '1'; 
+    scl <= clk when scl_on = '1' else 'H'; 
     process
         procedure free_bus is
         begin
             -- scl_o <= '1';
-            sda_o <= '1';
+            sda <= 'H';
         end procedure;
     
         procedure send_start is
@@ -45,7 +43,7 @@ begin
             wait until rising_edge(clk);
             scl_on <= '1';
             wait for CLK_PERIOD_100KHZ/4;
-            sda_o <= '0';
+            sda <= '0';
             wait for CLK_PERIOD_100KHZ/4;
         end procedure;
     
@@ -60,36 +58,37 @@ begin
             end if;
             data := slave_addr & rw_sl;
             for i in 7 downto 0 loop
-                wait until falling_edge(scl_i);
+                wait until falling_edge(scl);
                 wait for CLK_PERIOD_100KHZ/4;
-                sda_o <= data(i);  
+                sda <= 'H' when data(i) = '1' else '0';  
             end loop;
         end procedure;
 
         procedure read_byte (data_out : out std_logic_vector(7 downto 0)) is
         begin
             for i in 7 downto 0 loop
-                wait until rising_edge(scl_i);
+                wait until rising_edge(scl);
+                free_bus;
                 wait for CLK_PERIOD_100KHZ/4;
-                data_out(i) := sda_i;  
+                data_out(i) := sda;  
             end loop;
         end procedure;
 
         procedure is_acknowledged(result : out boolean) is
         begin
-            wait until rising_edge(scl_i);
+            wait until rising_edge(scl);
             wait for CLK_PERIOD_100KHZ/4;
-            result := sda_i = '0';
+            result := sda = '0';
         end procedure;
 
         procedure do_acknowledge(result : in boolean) is
         begin
-            wait until falling_edge(scl_i);
+            wait until falling_edge(scl);
             wait for CLK_PERIOD_100KHZ/4;
             if result then
-                sda_o <= '0';
+                sda <= '0';
             else 
-                sda_o <= '1';
+                sda <= 'H';
             end if;
         end procedure;
 

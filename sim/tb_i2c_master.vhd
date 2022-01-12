@@ -10,8 +10,8 @@ end tb_i2c_master;
 
 architecture bench of tb_i2c_master is
 
-    signal sda_c, sda_o1, sda_o2 : std_logic;
-    signal scl_c, scl_o1, scl_o2 : std_logic;
+    signal sda : std_logic := 'H';
+    signal scl : std_logic := 'H';
 
 begin
 
@@ -23,17 +23,9 @@ begin
             data_rdy => open,
             i2c_data => open, 
             --i2c communtiation interface        
-            sda_o => sda_o1,
-            scl_o => scl_o1,
-            sda_i => sda_c,
-            scl_i => scl_c        
+            sda => sda,
+            scl => scl      
         );
-
-    sda_c <= sda_o1 and sda_o2;
-    scl_c <= scl_o1 and scl_o2;
-    
-    sda_o2 <= '1';
-    scl_o2 <= '1';
 
     -- SDA_PULLUP : PULLUP
     -- port map (
