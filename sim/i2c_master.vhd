@@ -4,6 +4,9 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
 entity i2c_master is
+  generic(
+    cont_mode : boolean := false
+  );
   port (
     reset : in std_logic;
     --communication with stimulus
@@ -106,7 +109,7 @@ begin
             read_byte(data(15 downto 8));
             do_acknowledge(true);
             read_byte(data(7 downto 0));
-            do_acknowledge(true);
+            do_acknowledge(cont_mode);
             data_rdy <= '1';
             i2c_data <= data(11 downto 0);
         wait;
