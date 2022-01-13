@@ -10,8 +10,8 @@ end tb_i2c_master;
 
 architecture bench of tb_i2c_master is
 
-    signal sda : std_logic;
-    signal scl : std_logic;
+    signal sda : std_logic := 'H';
+    signal scl : std_logic := 'H';
 
 begin
 
@@ -24,18 +24,18 @@ begin
             i2c_data => open, 
             --i2c communtiation interface        
             sda => sda,
-            scl => scl       
+            scl => scl      
         );
 
-    SDA_PULLUP : PULLUP
-    port map (
-    O => sda -- Pullup output (connect directly to top-level port)
-    );
+    -- SDA_PULLUP : PULLUP
+    -- port map (
+    -- O => sda_c -- Pullup output (connect directly to top-level port)
+    -- );
 
-    SCL_PULLUP : PULLUP
-    port map (
-    O => scl -- Pullup output (connect directly to top-level port)
-    );
+    -- SCL_PULLUP : PULLUP
+    -- port map (
+    -- O => scl_c -- Pullup output (connect directly to top-level port)
+    -- );
 
 
 end bench;
