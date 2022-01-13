@@ -15,7 +15,7 @@ architecture bench of tb_i2c_master is
 
 begin
 
-    DUT : entity work.i2c_master
+    DUT1 : entity work.i2c_master
         port map(
             reset => '0',
             --communication with stimulus
@@ -25,6 +25,17 @@ begin
             --i2c communtiation interface        
             sda => sda,
             scl => scl      
+        );
+
+    DUT2 : entity work.adc
+        generic map(
+            MASTER_BYTE => "10011011",
+            CLK_PERIOD => 10 us
+        )
+        port map(
+            scl => scl,
+            sda => sda,
+            rng_data => "10101010"
         );
 
     -- SDA_PULLUP : PULLUP
