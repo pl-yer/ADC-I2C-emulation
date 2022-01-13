@@ -137,7 +137,7 @@ begin
               send_address("1001101", do_rd_or_wr_int); -- read is acquisition ; write is polling
               report "address";
               is_acknowledged(result);
-              if not result then --else retransmition
+              if result then --else retransmition
                   exit;
               end if; 
             end loop;
