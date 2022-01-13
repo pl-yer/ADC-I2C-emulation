@@ -8,7 +8,7 @@ proc usage {} {
     exit 1
 }
 
-if {($argc != 1) || ([lindex $argv 0] ni {"simulation" "bitstream" "program"})} {
+if {($argc != 1) || ([lindex $argv 0] ni {"simulation" "bitstream" "program" "gooey"})} {
     usage
 }
 
@@ -55,7 +55,8 @@ update_compile_order -fileset sim_1
 if {[lindex $argv 0] == "simulation"} {
     launch_simulation
     start_gui
-} else {
+}
+if {[lindex $argv 0] == "bitstream"} {
 	
 	
 	
@@ -65,5 +66,8 @@ if {[lindex $argv 0] == "simulation"} {
     launch_runs impl_1 -to_step write_bitstream -jobs 8
     wait_on_run impl_1
     exit
+}
+if {[lindex $argv 0] == "gooey"} {
+    start_gui
 }
 
