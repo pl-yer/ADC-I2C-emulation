@@ -24,6 +24,8 @@ architecture adc_arch of adc is
     signal polling : std_logic := '0';
     signal data_reg : std_logic_vector(15 downto 0) := (others => '0');
     signal first_byte : std_logic := '1';
+    signal exit_rx_ack : std_logic := '0';
+
 begin
     
     CLK_GEN : process 
@@ -92,7 +94,6 @@ begin
             when SEND_DATA =>
                 if scl_prev = '1' and scl_reg = '0' then
                     if bit_count = 7 then
-                        bit_count <= 0;
                         state_nxt <= RX_ACK;
                     else 
                         bit_count <= bit_count + 1;
@@ -102,9 +103,13 @@ begin
                     state_nxt <= SEND_DATA;
                 end if;
             when RX_ACK =>
-                if sda_reg = sda_prev and scl_prev = '1' and scl_reg = '1'  then
+                if scl_prev = '1' and scl_reg = '0' and exit_rx_ack = '1' then
+                    state_nxt <= SEND_DATA;
+                elsif sda_reg = sda_prev and scl_prev = '1' and scl_reg = '1'  then
                     if sda_reg = '0' then
-                        state_nxt <= SEND_DATA;
+                        bit_count <= 0;
+                        state_nxt <= RX_ACK;
+                        exit_rx_ack <= '1';
                         if first_byte = '1' then
                             first_byte <= '0';
                         elsif first_byte = '0' then
