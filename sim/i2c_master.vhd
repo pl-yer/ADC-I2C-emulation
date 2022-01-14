@@ -155,6 +155,8 @@ begin
               read_byte(data(15 downto 8));
               do_acknowledge(true);
               read_byte(data(7 downto 0));
+              data_rdy <= '1';
+              i2c_data <= to_stdlogicvector(to_bitvector(data(11 downto 0)));
               sample_to_acq <= sample_to_acq - 1;
               wait for 1 ps;
               if sample_to_acq > 0 then
@@ -162,12 +164,11 @@ begin
               else
                 do_acknowledge(false);
               end if;
-              data_rdy <= '1';
-              i2c_data <= to_stdlogicvector(to_bitvector(data(11 downto 0)));
               if sample_to_acq = 0 then
                 state <= READY; 
                 send_stop;              
               end if;
+              data_rdy <= '0';
           end case;
       end loop;
     end process;
