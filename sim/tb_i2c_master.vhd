@@ -1,6 +1,7 @@
 
-library IEEE;
-use IEEE.STD_LOGIC_1164.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
 entity tb_i2c_master is
 end tb_i2c_master;
@@ -16,7 +17,7 @@ begin
     DUT1 : entity work.i2c_master
         port map(
             --communication with stimulus
-            no_of_samples => "0010",
+            no_of_samples => std_logic_vector(to_unsigned(3, 4)),
             rdy_for_data => rdy_for_data,
             data_rdy => open,
             i2c_data => open, 

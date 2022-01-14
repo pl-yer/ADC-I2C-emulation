@@ -22,7 +22,7 @@ architecture i2c_master_arch of i2c_master is
   constant CLK_PERIOD_100KHZ : time := 10 us;
   type t_RW is (READ, WRITE); 
 
-  type t_state is (READY, ACQUSITION);
+  type t_state is (READY, ADDRESS, READ_DATA);
 
   signal clk : std_logic := '0';
   signal scl_on : std_logic := '0';  
@@ -122,7 +122,7 @@ begin
           when READY =>
             free_bus;
             wait until rdy_for_data = '1';
-            state <= ACQUSITION;
+            state <= ADDRESS;
             wait for CLK_PERIOD_100KHZ/8;
             sample_to_acq <= to_integer(unsigned(no_of_samples));
             if sample_to_acq = 0 then
@@ -133,7 +133,7 @@ begin
               do_rd_or_wr_int := READ;
             end if;
             report "out ready";
-          when ACQUSITION =>
+          when ADDRESS =>
             while true loop
               report "acq";
               send_start;
@@ -148,26 +148,27 @@ begin
             if sample_to_acq = 0 then
               state <= READY;
               send_stop;
-              exit;
+            else
+              state <= READ_DATA;
             end if;
-            report "reading";
-            read_byte(data(15 downto 8));
-            do_acknowledge(true);
-            read_byte(data(7 downto 0));
-            if sample_to_acq > 0 then
+          when READ_DATA =>
+              read_byte(data(15 downto 8));
               do_acknowledge(true);
-            else
-              do_acknowledge(false);
-            end if;
-            data_rdy <= '1';
-            i2c_data <= to_stdlogicvector(to_bitvector(data(11 downto 0)));
-            if sample_to_acq = 0 then
-              state <= READY;
-            else
+              read_byte(data(7 downto 0));
               sample_to_acq <= sample_to_acq - 1;
-            end if;
-            send_stop;
-        end case;
+              wait for 1 ps;
+              if sample_to_acq > 0 then
+                do_acknowledge(true);
+              else
+                do_acknowledge(false);
+              end if;
+              data_rdy <= '1';
+              i2c_data <= to_stdlogicvector(to_bitvector(data(11 downto 0)));
+              if sample_to_acq = 0 then
+                state <= READY; 
+                send_stop;              
+              end if;
+          end case;
       end loop;
     end process;
 end i2c_master_arch;
