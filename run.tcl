@@ -47,6 +47,7 @@ add_files -fileset sim_1 {
 	sim/tb_i2c_master.vhd
 	sim/testbench.vhd
 	sim/stimulus.vhd
+	sim/rng.vhd
 }
 
 set_property top ${top_module} [current_fileset]
