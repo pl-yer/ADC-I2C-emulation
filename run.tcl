@@ -48,6 +48,7 @@ add_files -fileset sim_1 {
 	sim/testbench.vhd
 	sim/stimulus.vhd
 	sim/rng.vhd
+    sim/adc.vhd
 }
 
 set_property top ${top_module} [current_fileset]
