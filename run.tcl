@@ -36,8 +36,9 @@ if {[lindex $argv 0] == "program"} {
 # read_xdc {
 # }
 
-# read_vhdl {
-# }
+read_vhdl {
+    rtl/rng.vhd
+}
 
 # read_mem {
 # }
