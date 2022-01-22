@@ -24,7 +24,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
@@ -38,11 +38,16 @@ entity rng is
 end rng;
 
 architecture Behavioral of rng is
-
 begin
-    process(rng_en, rng_rdy)
+    process
+        variable data : integer := 1365;
     begin 
-        rng_data <= "010101010101";
+        wait until rising_edge(rng_en);
+        rng_rdy <= '0';
+        wait for 10 ns;
+        rng_data <= std_logic_vector(to_unsigned(data, rng_data'length));
+        data := data + 1;
+        rng_rdy <= '1';
     end process;
 
 end Behavioral;

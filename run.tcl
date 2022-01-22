@@ -1,5 +1,5 @@
 set project ADC_I2C_emulation
-set top_module i2c_master
+set top_module testbench
 set target xc7z020clg400
 set bitstream_file build/${project}.runs/impl_1/${top_module}.bit
 

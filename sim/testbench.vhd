@@ -47,16 +47,14 @@ architecture Structural of testbench is
     
     component i2c_master is
     port (
-        reset : in std_logic;
         --communication with stimulus
-        no_of_samples : out STD_LOGIC_VECTOR (3 downto 0);
+        no_of_samples : in std_logic_vector(3 downto 0);
         rdy_for_data : in std_logic;
         data_rdy : out std_logic;
         i2c_data : out std_logic_vector(11 downto 0);
         --i2c communtiation interface        
         sda : inout std_logic;
-        scl : inout std_logic       
-    );
+        scl : inout std_logic); 
     end component;
     
     component rng is
@@ -65,10 +63,47 @@ architecture Structural of testbench is
         rng_data : out STD_LOGIC_VECTOR (11 downto 0));
     end component;
     
---    component adc
---    end component;    
+    component adc is
+    generic (
+        ADDRESS : std_logic_vector(6 downto 0) := "1001101"
+    );
+    port (
+        scl : inout std_logic;
+        sda : inout std_logic;
+        rng_data : in std_logic_vector(11 downto 0)
+    );
+    end component;    
+    
+    signal rng_en, data_rdy, rng_rdy, rdy_for_data, sda, scl : std_logic;
+    signal i2c_data, rng_data : std_logic_vector (11 downto 0);
+    signal no_of_samples : std_logic_vector (3 downto 0);
     
 begin
+    dut_master : i2c_master
+        port map (no_of_samples => no_of_samples,
+        rdy_for_data => rdy_for_data,
+        data_rdy => data_rdy,
+        i2c_data => i2c_data,
+        sda => sda,
+        scl => scl);
     
+    dut_adc : adc
+        port map ( scl => scl,
+        sda => sda,
+        rng_data => rng_data);
+        
+    dut_stimulus : stimulus
+        port map ( data_rdy => data_rdy,
+        i2c_data => i2c_data,
+        rng_data => rng_data,
+        rng_rdy => rng_rdy,
+        rng_en => rng_en,
+        no_of_samples => no_of_samples,
+        rdy_for_data => rdy_for_data);
+        
+    dut_rng : rng 
+        port map ( rng_en => rng_en,
+        rng_rdy => rng_rdy,
+        rng_data => rng_data );
 
 end Structural;

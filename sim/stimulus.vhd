@@ -52,29 +52,38 @@ architecture Behavioral of stimulus is
 begin
     process 
         variable i, j : integer := 0;
+        variable no_of_samples_buf : std_logic_vector(3 downto 0);
     begin 
+        rng_en <= '0';
         i := 1;
+        wait for 10 ns;
         while i < 16 loop
-            no_of_samples <= std_logic_vector(to_unsigned(i, 4));
-            rng_en <= '1';
-            wait until (rng_rdy = '1');
-            rng_en <= '0';
-            rdy_for_data <= '1';
-            wait for 1 us; -- enter another delta cycle
+
+            no_of_samples_buf := std_logic_vector(to_unsigned(i, 4));
+            no_of_samples <= no_of_samples_buf;
             j := 0;
-            while j < integer(no_of_samples) loop 
+            while j < to_integer(unsigned(no_of_samples_buf)) loop 
                 
                 rng_reg <= rng_data; -- saving currently sampled rng data 
+                --
                 rng_en <= '1'; -- generate new number 
                 wait until rng_rdy = '1';
                 rng_en <= '0';
+                rdy_for_data <= '1';
                 
                 wait until data_rdy = '1';
                 i2c_reg <= i2c_data;
                 compare_and_log;
                 
+                wait until data_rdy = '0'; -- master in ready
+                rdy_for_data <= '0';
+                
+                wait for 10 ns;
+                
                 j := j + 1;
             end loop;
+            
+            
             
             i := i + 1;
         end loop;
