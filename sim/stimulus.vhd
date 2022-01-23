@@ -33,18 +33,22 @@ use IEEE.NUMERIC_STD.ALL;
 --use UNISIM.VComponents.all;
 
 entity stimulus is
+    Generic ( rng_clk_period : time := 10ns);
     Port ( data_rdy : in STD_LOGIC;
            i2c_data : in STD_LOGIC_VECTOR (11 downto 0);
            rng_data : in STD_LOGIC_VECTOR (11 downto 0);
            rng_rdy : in STD_LOGIC;
            rng_en : out STD_LOGIC;
            no_of_samples : out STD_LOGIC_VECTOR (3 downto 0);
-           rdy_for_data : out STD_LOGIC);
+           rdy_for_data : out STD_LOGIC;
+           rng_clk : out STD_LOGIC;
+           rst : out STD_LOGIC);
 end stimulus;
 
 architecture Behavioral of stimulus is
 
     signal i2c_reg, rng_reg : STD_LOGIC_VECTOR (11 downto 0);
+    signal rng_clk_int : std_logic := '0';
     
     file file_results : text open write_mode is "results.txt";
     
@@ -65,14 +69,21 @@ architecture Behavioral of stimulus is
     end procedure;
 
 begin
+    
+    rng_clk_int <= not rng_clk_int after rng_clk_period / 2;
+    rng_clk <= rng_clk_int;
+
     process 
         variable i, j : integer := 0;
         variable no_of_samples_buf : std_logic_vector(3 downto 0);
         
     begin 
         rng_en <= '0';
+        rst <= '1';
         i := 1;
-        wait for 10 ns;
+        wait for 2 * rng_clk_period;
+        rst <= '0';
+        wait for rng_clk_period;
         while i < 16 loop
 
             no_of_samples_buf := std_logic_vector(to_unsigned(i, 4));
@@ -99,8 +110,6 @@ begin
                 
                 j := j + 1;
             end loop;
-            
-            
             
             i := i + 1;
         end loop;

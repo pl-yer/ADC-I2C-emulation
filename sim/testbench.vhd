@@ -42,7 +42,9 @@ architecture Structural of testbench is
            rng_rdy : in STD_LOGIC;
            rng_en : out STD_LOGIC;
            no_of_samples : out STD_LOGIC_VECTOR (3 downto 0);
-           rdy_for_data : out STD_LOGIC);
+           rdy_for_data : out STD_LOGIC;
+           rng_clk : out STD_LOGIC;
+            rst : out std_logic);
     end component;
     
     component i2c_master is
@@ -58,9 +60,14 @@ architecture Structural of testbench is
     end component;
     
     component rng is
-    Port ( rng_en : in STD_LOGIC;
-        rng_rdy : out STD_LOGIC;
-        rng_data : out STD_LOGIC_VECTOR (11 downto 0));
+    Generic (
+        ADDRESS : std_logic_vector(6 downto 0) := "1001101");
+    Port ( clk : in std_logic;
+        rst : in std_logic;
+        rng_en : in std_logic;
+        rng_data : buffer std_logic_vector(3 downto 0);
+        rng_rdy : out std_logic;
+        rng_adc : out std_logic_vector(11 downto 0));
     end component;
     
     component adc is
@@ -70,11 +77,10 @@ architecture Structural of testbench is
     port (
         scl : inout std_logic;
         sda : inout std_logic;
-        rng_data : in std_logic_vector(11 downto 0)
-    );
+        rng_data : in std_logic_vector(11 downto 0));
     end component;    
     
-    signal rng_en, data_rdy, rng_rdy, rdy_for_data, sda, scl : std_logic;
+    signal rng_en, data_rdy, rng_rdy, rdy_for_data, sda, scl, rng_clk, rng_rst : std_logic;
     signal i2c_data, rng_data : std_logic_vector (11 downto 0);
     signal no_of_samples : std_logic_vector (3 downto 0);
     
@@ -99,11 +105,16 @@ begin
         rng_rdy => rng_rdy,
         rng_en => rng_en,
         no_of_samples => no_of_samples,
-        rdy_for_data => rdy_for_data);
+        rdy_for_data => rdy_for_data,
+        rng_clk => rng_clk,
+        rst => rng_rst);
         
     dut_rng : rng 
-        port map ( rng_en => rng_en,
+        port map ( clk => rng_clk,
+        rst => rng_rst,
+        rng_en => rng_en,
+--        rng_data => rng_data,
         rng_rdy => rng_rdy,
-        rng_data => rng_data );
+        rng_adc => rng_data);
 
 end Structural;
