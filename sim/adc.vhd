@@ -148,7 +148,7 @@ begin
             when SEND_DATA =>
                 if first_byte = '1' then
                     if data_reg(15-bit_count) = '1'  then  
-                        sda <= '1';
+                        sda <= 'H';
                     else 
                         sda <= '0';
                     end if;

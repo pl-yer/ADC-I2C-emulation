@@ -15,13 +15,14 @@
 -- Revision:
 -- Revision 0.01 - File Created
 -- Additional Comments:
--- 
+-- SIMULATE FOR 30US
 ----------------------------------------------------------------------------------
 
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
+use std.textio.all;
+use IEEE.std_logic_textio.all;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
@@ -44,15 +45,30 @@ end stimulus;
 architecture Behavioral of stimulus is
 
     signal i2c_reg, rng_reg : STD_LOGIC_VECTOR (11 downto 0);
-
-    procedure compare_and_log is 
-    begin 
+    
+    file file_results : text open write_mode is "results.txt";
+    
+    procedure compare_and_log
+        (i2c_d : in std_logic_vector (11 downto 0);
+        rng_d : in std_logic_vector (11 downto 0)) is 
+        variable v_line : line;
+    begin
+        if (i2c_data = rng_data) then
+            write(v_line, string'("TEST PASSED. GENERATED VALUE:"));
+            hwrite(v_line, rng_d, right, 4);
+            write(v_line, string'(" RECEIVED VALUE:"));
+            hwrite(v_line, i2c_d, right, 4);
+        else 
+            write(v_line, string'("TEST FAILED. GENERATED VALUE: RECEIVED VALUE: "));
+        end if;
+        writeline(file_results, v_line); 
     end procedure;
 
 begin
     process 
         variable i, j : integer := 0;
         variable no_of_samples_buf : std_logic_vector(3 downto 0);
+        
     begin 
         rng_en <= '0';
         i := 1;
@@ -73,7 +89,8 @@ begin
                 
                 wait until data_rdy = '1';
                 i2c_reg <= i2c_data;
-                compare_and_log;
+                wait for 1ps;
+                compare_and_log(i2c_reg, rng_data);
                 
                 wait until data_rdy = '0'; -- master in ready
                 rdy_for_data <= '0';
