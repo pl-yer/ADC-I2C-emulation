@@ -27,7 +27,6 @@ architecture i2c_master_arch of i2c_master is
   signal clk : std_logic := '0';
   signal scl_on : std_logic := '0';  
   signal state : t_state := READY;
-  signal sample_to_acq : integer;
   signal do_rd_or_wr : t_RW;
 
 begin
@@ -115,6 +114,7 @@ begin
         variable result : boolean;
         variable data : std_logic_vector(15 downto 0);
         variable do_rd_or_wr_int : t_RW := do_rd_or_wr;
+        variable sample_to_acq : integer := 0;
     begin
       while true loop
         wait for 1 ns;
@@ -124,7 +124,7 @@ begin
             wait until rdy_for_data = '1';
             state <= ADDRESS;
             wait for CLK_PERIOD_100KHZ/8;
-            sample_to_acq <= to_integer(unsigned(no_of_samples));
+            sample_to_acq := to_integer(unsigned(no_of_samples));
             if sample_to_acq = 0 then
               do_rd_or_wr <= WRITE;
               do_rd_or_wr_int := WRITE;
@@ -157,7 +157,7 @@ begin
               read_byte(data(7 downto 0));
               data_rdy <= '1';
               i2c_data <= to_stdlogicvector(to_bitvector(data(11 downto 0)));
-              sample_to_acq <= sample_to_acq - 1;
+              sample_to_acq := sample_to_acq - 1;
               wait for 1 ps;
               if sample_to_acq > 0 then
                 do_acknowledge(true);
