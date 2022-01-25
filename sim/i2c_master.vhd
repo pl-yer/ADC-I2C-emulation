@@ -27,7 +27,6 @@ architecture i2c_master_arch of i2c_master is
   signal clk : std_logic := '0';
   signal scl_on : std_logic := '0';  
   signal state : t_state := READY;
---  signal sample_to_acq : integer;
   signal do_rd_or_wr : t_RW;
 
 begin
@@ -117,7 +116,7 @@ begin
         variable result : boolean;
         variable data : std_logic_vector(15 downto 0);
         variable do_rd_or_wr_int : t_RW := do_rd_or_wr;
-        variable sample_to_acq : integer;
+        variable sample_to_acq : integer := 0;
     begin
       while true loop
         wait for 1 ns;
