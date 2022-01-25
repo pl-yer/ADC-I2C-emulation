@@ -60,8 +60,6 @@ architecture Structural of testbench is
     end component;
     
     component rng is
-    Generic (
-        ADDRESS : std_logic_vector(6 downto 0) := "1001101");
     Port ( clk : in std_logic;
         rst : in std_logic;
         rng_en : in std_logic;

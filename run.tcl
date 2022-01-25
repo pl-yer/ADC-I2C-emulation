@@ -48,7 +48,6 @@ add_files -fileset sim_1 {
 	sim/tb_i2c_master.vhd
 	sim/testbench.vhd
 	sim/stimulus.vhd
-	sim/rng.vhd
     sim/adc.vhd
 }
 
