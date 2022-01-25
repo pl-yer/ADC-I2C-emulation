@@ -79,12 +79,14 @@ begin
         end procedure;
 
         procedure is_acknowledged(result : out boolean) is
+            variable result_buf : boolean;
         begin
             wait until rising_edge(scl);
             wait until rising_edge(scl);
             wait for CLK_PERIOD_100KHZ/4;
-            result := sda = '0';
-            report "ack check" & boolean'image(result);
+            result_buf := sda = '0';
+            result := result_buf;
+            report "ack check" & boolean'image(result_buf);
         end procedure;
 
         procedure do_acknowledge(result : in boolean) is
@@ -120,9 +122,13 @@ begin
         wait for 1 ns;
         case state is
           when READY =>
+            report "in READY";
             free_bus;
+            report "bus freed in READY";
             wait until rdy_for_data = '1';
+            report "wait until rdy for data is '1' cleared";
             state <= ADDRESS;
+            
             wait for CLK_PERIOD_100KHZ/8;
             sample_to_acq := to_integer(unsigned(no_of_samples));
             if sample_to_acq = 0 then

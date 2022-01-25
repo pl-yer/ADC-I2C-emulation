@@ -82,7 +82,11 @@ begin
                 elsif sda_prev = sda_reg and scl_prev = '1' and scl_reg = '1' then
                     bit_count_nxt <= bit_count + 1;
                     if bit_count < 8 then
-                        header_reg_nxt(7-bit_count) <= '1' when sda_reg = 'H' else '0';
+                        if sda_reg = 'H' then
+                            header_reg(7-bit_count) <= '1';
+                        else 
+                            header_reg(7-bit_count) <= '0';
+                        end if;
                         state_nxt <= CHECK_HEADER;
                     end if;
                 end if;
@@ -143,9 +147,17 @@ begin
                 sda <= '0';
             when SEND_DATA =>
                 if first_byte = '1' then
-                    sda <= 'H' when data_reg(15-bit_count) = '1' else '0';
+                    if data_reg(15-bit_count) = '1'  then  
+                        sda <= 'H';
+                    else 
+                        sda <= '0';
+                    end if;
                 else 
-                    sda <='H' when data_reg(7-bit_count) = '1' else '0';
+                    if data_reg(7-bit_count) = '1' then 
+                        sda <= 'H';
+                    else 
+                        sda <= '0';
+                    end if;
                 end if;
             when others =>
                 sda <= 'H';

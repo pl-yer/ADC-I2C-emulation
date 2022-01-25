@@ -9,7 +9,9 @@ entity rng is
     port (
         clk : in std_logic;
         rst : in std_logic;
+        rng_en : in std_logic;
         rng_data : buffer std_logic_vector(3 downto 0);
+        rng_rdy : out std_logic := '0';
         rng_adc : out std_logic_vector(11 downto 0)
     );
 end rng;
@@ -61,19 +63,21 @@ architecture arch_rng of rng is
     );
 
     type t_regs is array (0 to 9) of std_logic_vector(3 downto 0);
-
+    type state_type is (IDLE, GEN, READY);
+    
     signal regs : t_regs;
+    signal state : state_type := IDLE;
 
     constant x5_mult_table : t_arith_table := and_gf16(6);
     constant x0_mult_table : t_arith_table := and_gf16(1);
     
-    signal nibble_ctr : unsigned(1 downto 0);
+    signal nibble_ctr : unsigned(1 downto 0) := "00";
 
     signal rng_adc_int : std_logic_vector(11 downto 0);
 
 begin
 
-    process (all)
+    process (clk)
     begin
         if rising_edge(clk) then
             rng_data <= regs(0);
@@ -88,19 +92,45 @@ begin
         end if;
     end process;
 
-    process (all)
+    process (clk)
     begin
         if rising_edge(clk) then
-            if rst = '1' then
+            if state = IDLE then
                 nibble_ctr <= "00";
-            elsif nibble_ctr = "10" then
-                nibble_ctr <= "00";
-            else
-                nibble_ctr <= nibble_ctr + "01";
-            end if;
-            if nibble_ctr = 0 then
+                
+                if rng_en = '0' then
+                    state <= IDLE;
+                else 
+                    state <= GEN;
+                    rng_rdy <= '0';
+                end if;
+            elsif state = GEN then
+                if nibble_ctr = "10" then 
+                    nibble_ctr <= "00";
+                    state <= READY;
+                else 
+                    nibble_ctr <= nibble_ctr + "01";
+                end if;
+            elsif state = READY then
+                state <= IDLE;
                 rng_adc <= rng_adc_int;
+                rng_rdy <= '1';
             end if;
+--            elsif nibble_ctr = "00" then 
+--                rng_rdy <= '1';
+--                rng_adc <= rng_adc_int;
+--            elsif nibble_ctr = "10" then
+--                nibble_ctr <= "00";
+--            else 
+--                rng_rdy <= '0';
+--                nibble_ctr <= nibble_ctr + "01";
+--            else then
+--                rng_adc <= rng_adc_int;
+--                rng_rdy <= '1';
+--            else 
+--                rng_rdy <= '0';
+--                nibble_ctr <= nibble_ctr + "01";
+--            end if;
             rng_adc_int(4*to_integer(nibble_ctr) + 3 downto 4*to_integer(nibble_ctr)) <= rng_data;
         end if;
     end process;
